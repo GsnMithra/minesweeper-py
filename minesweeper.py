@@ -5,7 +5,9 @@ import random
 from algorithm import updateBoard
 
 mines_map = set ()
-def GenerateGrid (rows=25, cols=25, mine_count=random.randint (40, 55)):
+red_flag_map = set ()
+
+def GenerateGrid (rows=15, cols=15, mine_count=random.randint (20, 35)):
     grid = [['E' for _ in range (cols)] for _ in range (rows)]
     for i in range (mine_count):
         row = random.randint (0, rows - 1)
@@ -20,7 +22,7 @@ window = pygame.display.set_mode ((WINDOW_WIDTH, WINDOW_HEIGHT))
 pygame.display.set_caption ('Minesweeper')
 
 grid = GenerateGrid ()
-cell_size = min(WINDOW_WIDTH // len(grid[0]), WINDOW_HEIGHT // len(grid))
+cell_size = min (WINDOW_WIDTH // len (grid[0]), WINDOW_HEIGHT // len (grid))
 
 resources_path = 'resources/'
 mine = pygame.image.load (os.path.join (resources_path, 'mine.png'))
@@ -48,6 +50,8 @@ clock = pygame.time.Clock ()
 
 running = True
 while running:
+    if red_flag_map == mines_map:
+        running = False
     for event in pygame.event.get ():
         if event.type == pygame.QUIT:
             running = False
@@ -58,12 +62,17 @@ while running:
         row = y // cell_size
         if event.button == 1:
             grid = updateBoard (grid, (row, col))
-        elif event.button == 3:
+        if event.button == 3:
             if grid[row][col] == 'E' or grid[row][col] == 'M':
                 grid[row][col] = 'R'
-            if grid[row][col] == 'R':
-                grid[row][col] = 'E'
-    
+                red_flag_map.add ((row, col))
+            elif grid[row][col] == 'R':
+                if (row, col) in mines_map:
+                    grid[row][col] = 'M'
+                else:
+                    grid[row][col] = 'E'
+                red_flag_map.remove ((row, col))
+
     for row in range (len (grid)):
         for col in range (len (grid[0])):
             cell_value = grid [row][col]
@@ -75,7 +84,6 @@ while running:
             else:
                 window.blit (numbers [int (cell_value) - 1], (x, y))
 
-    # window.fill ((184, 184, 184))
     pygame.display.flip ()
     clock.tick (60)
 pygame.quit ()

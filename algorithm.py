@@ -37,5 +37,30 @@ def updateBoard (board, click):
         board[click[0]][click[1]] = 'X'
         return board
 
-    mineSweepUtil (board, click[0], click[1], random.randint (1, 10))
+    mineSweepUtil (board, click[0], click[1], random.randint (1, 20))
+    if board[click[0]][click[1]] != 'M' or board[click[0]][click[1]] != 'E':
+        setMineCounts (board, click[0], click[1])
     return board
+
+def setMineCounts (board, X, Y):
+    visited = set ()
+    queue = list ()
+    queue.append ((X, Y))
+
+    while queue:
+        curr = queue.pop (0)
+
+        dx = [0, 0, 1, -1, -1, 1, -1, 1]
+        dy = [1, -1, 0, 0, -1, 1, 1, -1]
+
+        for i in range (7):
+            currX, currY = dx[i], dy[i]
+            if (currX, currY) not in visited:
+                if board[currX][currY] == 'B':
+                    currMines = mineCount (board, currX, currY)
+                    if currMines == 0:
+                        board[currX][currY] = 'B'
+                    else:
+                        board[currX][currY] = str (currMines)
+                    visited.add ((currX, currY))
+                    queue.append ((currX, currY))

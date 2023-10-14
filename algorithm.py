@@ -11,16 +11,17 @@ def mineCount (board, i, j):
                 mines += 1
     return mines
 
-def mineSweepUtil (board, i, j, count):
-    if count == 0:
+def mineSweepUtil (board, i, j, count, clone, hit):
+    if count <= 0 and hit:
         return
     if min (i, j) < 0 or i >= len (board) or j >= len (board[0]) or board[i][j] != 'E':
         return
     
     currMines = mineCount (board, i, j)
     if currMines != 0:
-        board [i][j] = str (currMines)
+        board [i][j] = clone[i][j]
     else:
+        hit = True
         board [i][j] = 'B'
     
         dx = [0, 0, 1, -1, -1, 1, -1, 1]
@@ -30,14 +31,14 @@ def mineSweepUtil (board, i, j, count):
             newX = i + dx [s]
             newY = j + dy [s]
 
-            mineSweepUtil (board, newX, newY, count - 1)
+            mineSweepUtil (board, newX, newY, count - 1, clone, hit)
 
-def updateBoard (board, click):
+def updateBoard (board, click, clone):
     if board[click[0]][click[1]] == 'M':
         board[click[0]][click[1]] = 'X'
         return board
 
-    mineSweepUtil (board, click[0], click[1], random.randint (1, 20))
+    mineSweepUtil (board, click[0], click[1], random.randint (1, 15), clone, False)
     if board[click[0]][click[1]] != 'M' or board[click[0]][click[1]] != 'E':
         setMineCounts (board, click[0], click[1])
     return board
@@ -64,3 +65,11 @@ def setMineCounts (board, X, Y):
                         board[currX][currY] = str (currMines)
                     visited.add ((currX, currY))
                     queue.append ((currX, currY))
+
+def clonedGridValues (grid):
+    for i in range (len (grid)):
+        for j in range (len (grid)):
+            if grid[i][j] == 'E':
+                minesCount = mineCount (grid, i, j)
+                grid[i][j] = 'B' if minesCount == 0 else str (minesCount)
+    return grid

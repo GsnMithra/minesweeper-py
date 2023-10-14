@@ -1,13 +1,12 @@
 import os
-import cv2
 import pygame
 import random
-from algorithm import updateBoard
+from algorithm import updateBoard, clonedGridValues
 
 mines_map = set ()
 red_flag_map = set ()
 
-def GenerateGrid (rows=15, cols=15, mine_count=random.randint (20, 35)):
+def GenerateGrid (rows=25, cols=25, mine_count=random.randint (25, 40)):
     grid = [['E' for _ in range (cols)] for _ in range (rows)]
     for i in range (mine_count):
         row = random.randint (0, rows - 1)
@@ -22,6 +21,10 @@ window = pygame.display.set_mode ((WINDOW_WIDTH, WINDOW_HEIGHT))
 pygame.display.set_caption ('Minesweeper')
 
 grid = GenerateGrid ()
+clone_grid = [[row for row in col] for col in grid]
+
+clone_grid = clonedGridValues (clone_grid)
+
 cell_size = min (WINDOW_WIDTH // len (grid[0]), WINDOW_HEIGHT // len (grid))
 
 resources_path = 'resources/'
@@ -61,7 +64,7 @@ while running:
         col = x // cell_size
         row = y // cell_size
         if event.button == 1:
-            grid = updateBoard (grid, (row, col))
+            grid = updateBoard (grid, (row, col), clone_grid)
         if event.button == 3:
             if grid[row][col] == 'E' or grid[row][col] == 'M':
                 grid[row][col] = 'R'
